@@ -1,57 +1,62 @@
 import { FC, memo, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-
+import { useSelector } from 'react-redux';
 import { OrderCardProps } from './type';
 import { TIngredient } from '@utils-types';
 import { OrderCardUI } from '../ui/order-card';
+import { selectAllIngredients } from '../../services/slices/feedSlice';
 
-const maxIngredients = 6;
+const MAX_INGREDIENTS = 6;
 
 export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
-  const location = useLocation();
+  const currentLocation = useLocation();
+  const { data: ingredientData } = useSelector(selectAllIngredients);
 
-  /** TODO: взять переменную из стора */
-  const ingredients: TIngredient[] = [];
+  const calculateOrderInfo = useMemo(() => {
+    if (!ingredientData.length) return null;
 
-  const orderInfo = useMemo(() => {
-    if (!ingredients.length) return null;
-
-    const ingredientsInfo = order.ingredients.reduce(
-      (acc: TIngredient[], item: string) => {
-        const ingredient = ingredients.find((ing) => ing._id === item);
-        if (ingredient) return [...acc, ingredient];
+    const ingredientsList = order.ingredients.reduce(
+      (acc: TIngredient[], ingredientId: string) => {
+        const ingredient = ingredientData.find(
+          (ing) => ing._id === ingredientId
+        );
+        if (ingredient) acc.push(ingredient);
         return acc;
       },
       []
     );
 
-    const total = ingredientsInfo.reduce((acc, item) => acc + item.price, 0);
+    const totalPrice = ingredientsList.reduce(
+      (acc, ingredient) => acc + ingredient.price,
+      0
+    );
 
-    const ingredientsToShow = ingredientsInfo.slice(0, maxIngredients);
+    const visibleIngredients = ingredientsList.slice(0, MAX_INGREDIENTS);
 
-    const remains =
-      ingredientsInfo.length > maxIngredients
-        ? ingredientsInfo.length - maxIngredients
+    const hiddenIngredientsCount =
+      ingredientsList.length > MAX_INGREDIENTS
+        ? ingredientsList.length - MAX_INGREDIENTS
         : 0;
 
-    const date = new Date(order.createdAt);
+    const orderDate = new Date(order.createdAt);
+
     return {
       ...order,
-      ingredientsInfo,
-      ingredientsToShow,
-      remains,
-      total,
-      date
+      ingredientsInfo: ingredientsList,
+      ingredientsToShow: visibleIngredients,
+      remains: hiddenIngredientsCount,
+      total: totalPrice,
+      date: orderDate
     };
-  }, [order, ingredients]);
+  }, [order, ingredientData]);
 
-  if (!orderInfo) return null;
+  if (!calculateOrderInfo) return null;
 
   return (
     <OrderCardUI
-      orderInfo={orderInfo}
-      maxIngredients={maxIngredients}
-      locationState={{ background: location }}
+      orderInfo={calculateOrderInfo}
+      maxIngredients={MAX_INGREDIENTS}
+      locationState={{ background: currentLocation }}
     />
   );
 });
