@@ -7,7 +7,7 @@ import { FC, useEffect } from 'react';
 import {
   getIngredients,
   selectAllIngredients
-} from '../../services/slices/feedSlice';
+} from '../../services/slices/ingredientsSlice';
 import { useDispatch, useSelector } from '../../services/store';
 
 export const ConstructorPage: FC = () => {

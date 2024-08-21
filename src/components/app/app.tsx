@@ -11,18 +11,20 @@ import {
 } from '@pages';
 import '../../index.css';
 import styles from './app.module.css';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 import { ProtectedRoute, ProtectedRouteAuth } from '../protected-route';
 import { useDispatch } from '../../services/store';
 import { useEffect } from 'react';
 import { getUser } from '../../services/slices/userSlice';
-import { getIngredients } from '../../services/slices/feedSlice';
+import { getIngredients } from '../../services/slices/ingredientsSlice';
 import { getCookie } from '../../utils/cookie';
 
 const App = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const backgroundLocation = location.state?.background;
 
   useEffect(() => {
     dispatch(getIngredients());
@@ -36,7 +38,7 @@ const App = () => {
   return (
     <div className={styles.app}>
       <AppHeader />
-      <Routes>
+      <Routes location={backgroundLocation || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
         <Route
@@ -115,6 +117,37 @@ const App = () => {
         />
         <Route path='*' element={<NotFound404 />} />
       </Routes>
+
+      {backgroundLocation && (
+        <Routes>
+          <Route
+            path='/ingredients/:id'
+            element={
+              <Modal title='Детали ингредиента' onClose={handleModalClose}>
+                <IngredientDetails />
+              </Modal>
+            }
+          />
+          <Route
+            path='/feed/:number'
+            element={
+              <Modal title='Детали заказа' onClose={handleModalClose}>
+                <OrderInfo />
+              </Modal>
+            }
+          />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <Modal title='Детали заказа' onClose={handleModalClose}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      )}
     </div>
   );
 };

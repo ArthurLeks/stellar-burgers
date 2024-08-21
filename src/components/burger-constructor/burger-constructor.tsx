@@ -6,7 +6,7 @@ import {
   selectConstructorItems,
   selectUserOrder,
   closeOrderModal as closeModal
-} from '../../services/slices/feedSlice';
+} from '../../services/slices/constructorSlice';
 import { useNavigate } from 'react-router-dom';
 import { getCookie } from '../../utils/cookie';
 import { AppDispatch, useDispatch, useSelector } from '../../services/store';

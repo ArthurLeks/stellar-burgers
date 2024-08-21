@@ -7,9 +7,9 @@ import { AppDispatch } from 'src/services/store';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   getOrderByNumber,
-  selectAllIngredients,
   selectOrderInfo
-} from '../../services/slices/feedSlice';
+} from '../../services/slices/orderDetailsSlice';
+import { selectAllIngredients } from '../../services/slices/ingredientsSlice';
 
 export const OrderInfo: FC = () => {
   const { number: orderId } = useParams();
