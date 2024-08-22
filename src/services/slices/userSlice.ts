@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
   forgotPasswordApi,
+  getOrdersApi,
   getUserApi,
   loginUserApi,
   logoutApi,
@@ -11,6 +12,7 @@ import {
   updateUserApi
 } from '@api';
 import { deleteCookie } from '../../utils/cookie';
+import { TOrder } from '@utils-types';
 
 interface IUserState {
   email: string;
@@ -18,6 +20,10 @@ interface IUserState {
   password: string;
   isLoading: boolean;
   error: string | null | undefined;
+  orders: {
+    data: TOrder[] | null;
+    isLoading: boolean;
+  };
 }
 
 const initialState: IUserState = {
@@ -25,8 +31,17 @@ const initialState: IUserState = {
   name: '',
   password: '',
   isLoading: true,
-  error: null
+  error: null,
+
+  orders: {
+    data: null,
+    isLoading: true
+  }
 };
+
+export const getOrders = createAsyncThunk('feed/getOrders', async function () {
+  return await getOrdersApi();
+});
 
 export const registerUser = createAsyncThunk(
   'user/registerUser',
@@ -78,6 +93,9 @@ const userSlice = createSlice({
   selectors: {
     selectUser: function (state) {
       return state;
+    },
+    selectOrders: function (state) {
+      return state.orders;
     }
   },
   extraReducers: (builder) => {
@@ -174,9 +192,18 @@ const userSlice = createSlice({
         state.isLoading = false;
         localStorage.removeItem('refreshToken');
         deleteCookie('accessToken');
+      })
+      .addCase(getOrders.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(getOrders.rejected, (state, action) => {
+        state.error = action.error?.message;
+      })
+      .addCase(getOrders.fulfilled, (state, action) => {
+        state.orders.data = action.payload;
       });
   }
 });
 
-export const { selectUser } = userSlice.selectors;
+export const { selectUser, selectOrders } = userSlice.selectors;
 export default userSlice.reducer;
