@@ -8,13 +8,15 @@ interface IFeedState {
   total: number;
   totalToday: number;
   error: string | null | undefined;
+  loading: boolean;
 }
 
-const initialState: IFeedState = {
+export const initialState: IFeedState = {
   orders: [],
   total: 0,
   totalToday: 0,
-  error: null
+  error: null,
+  loading: false
 };
 
 export const getFeeds = createAsyncThunk('feed/getFeeds', async function () {
@@ -37,14 +39,17 @@ const feedSlice = createSlice({
     builder
       .addCase(getFeeds.pending, (state) => {
         state.error = null;
+        state.loading = true;
       })
       .addCase(getFeeds.rejected, (state, action) => {
         state.error = action.error?.message;
+        state.loading = false;
       })
       .addCase(getFeeds.fulfilled, (state, action) => {
         state.orders = action.payload.orders;
         state.total = action.payload.total;
         state.totalToday = action.payload.totalToday;
+        state.loading = false;
       });
   }
 });

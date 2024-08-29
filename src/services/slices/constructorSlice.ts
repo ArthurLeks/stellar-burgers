@@ -2,7 +2,7 @@ import { TConstructorIngredient, TOrder } from '@utils-types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { orderBurgerApi } from '@api';
 
-interface IConstructorState {
+export interface IConstructorState {
   constructorItems: {
     bun: TConstructorIngredient | null;
     ingredients: TConstructorIngredient[];
@@ -12,7 +12,7 @@ interface IConstructorState {
   error: string | null | undefined;
 }
 
-const initialState: IConstructorState = {
+export const initialState: IConstructorState = {
   constructorItems: {
     bun: null,
     ingredients: []
@@ -82,8 +82,9 @@ const constructorSlice = createSlice({
         state.orderRequest = false;
         state.orderModalData = action.payload.order;
       })
-      .addCase(orderBurger.rejected, (state) => {
+      .addCase(orderBurger.rejected, (state, action) => {
         state.orderRequest = false;
+        state.error = action.error.message;
       });
   }
 });

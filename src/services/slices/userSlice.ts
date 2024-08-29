@@ -26,7 +26,7 @@ interface IUserState {
   };
 }
 
-const initialState: IUserState = {
+export const initialState: IUserState = {
   email: '',
   name: '',
   password: '',
@@ -190,17 +190,20 @@ const userSlice = createSlice({
         state.email = '';
         state.name = '';
         state.isLoading = false;
-        localStorage.removeItem('refreshToken');
+        localStorage?.removeItem('refreshToken');
         deleteCookie('accessToken');
       })
       .addCase(getOrders.pending, (state) => {
         state.error = null;
+        state.isLoading = true;
       })
       .addCase(getOrders.rejected, (state, action) => {
         state.error = action.error?.message;
+        state.isLoading = false;
       })
       .addCase(getOrders.fulfilled, (state, action) => {
         state.orders.data = action.payload;
+        state.isLoading = false;
       });
   }
 });
